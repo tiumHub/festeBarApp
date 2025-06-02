@@ -48,65 +48,67 @@
     }
 
     #calculator {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: 0.5fr repeat(6, 1fr);
-      gap: 0.3em;
+      display: flex;
+      flex-direction: column;
       width: 100%;
       height: 100%;
+      gap: 0.3em;
     }
 
     .result {
-      grid-column: span 2;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      justify-content: right;
+      display: flex;
+      justify-content: flex-end;
       align-items: center;
+      gap: 0.5em;
     }
 
     #total {
       font-size: 2em;
-      padding-right: 0.5em;
     }
 
-    .btn, .clear {
+    .clear {
+      padding: 0.8em;
+      border: 0.15em solid var(--fg-color);
+      color: var(--fg-color);
+      border-radius: 25px;
+      user-select: none;
+    }
+
+    .row {
+      display: flex;
+      gap: 0.3em;
+      width: 100%;
+    }
+
+    .row > button {
+      flex: 1 1 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100%;
       border-radius: 25px;
       box-sizing: border-box;
       user-select: none;
       border: 0.15em solid currentColor;
+      height: 100%;
     }
 
-    .btn {
-      color: var(--cat-color, currentColor);
-    }
-
-    .btn[data-count]:not([data-count='0']) {
+    .row > button[data-count]:not([data-count='0']) {
       background-color: var(--cat-color);
       border-color: var(--cat-color);
       color: var(--fg-color);
     }
 
-    .btn::before {
+    .row > button::before {
       content: '\2007';
       font-weight: bold;
     }
 
-    .btn[data-count]:not([data-count='0'])::before {
+    .row > button[data-count]:not([data-count='0'])::before {
       content: attr(data-count) '\00a0';
     }
 
-    .btn[data-price]::after {
+    .row > button[data-price]::after {
       content: '\00a0' attr(data-price);
-    }
-
-    .clear {
-      padding: 0.8em;
-      border-color: var(--fg-color);
-      color: var(--fg-color);
     }
 
     .category-1 { --cat-color: var(--cat1-color); }
@@ -120,29 +122,39 @@
       <div id="total">0,00 €</div>
       <button class="clear" id="clear">AC</button>
     </div>
-    <!-- Buttons werden per JS erstellt -->
+
+    <!-- Pfand-Reihe -->
+    <div class="row" id="row-deposit"></div>
+
+    <!-- Kategorie 3 -->
+    <div class="row" id="row-cat3"></div>
+
+    <!-- Kategorie 2 -->
+    <div class="row" id="row-cat2"></div>
+
+    <!-- Kategorie 1 -->
+    <div class="row" id="row-cat1"></div>
   </div>
 
   <script>
     'use strict';
 
-    // Service Worker (optional, falls serviceworker.js vorhanden)
+    // Service Worker (optional)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
           .register('serviceworker.js')
-          .catch(() => { /* still OK without SW */ });
+          .catch(() => { /* OK auch ohne SW */ });
       });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       const locale = document.documentElement.lang;
-      const $calc = document.getElementById('calculator');
-      const $total = document.getElementById('total');
-      const $clear = document.getElementById('clear');
-      let deposit = 0;
+      const $total      = document.getElementById('total');
+      const $clear      = document.getElementById('clear');
+      let depositCount  = 0;
 
-      // Konfiguration der Buttons
+      // Button-Konfiguration
       const items = [
         { id: 'deposit_back', label: 'Pfand zurück', price: '1,00', type: 'pfand' },
         { id: 'beer',        label: 'Bier/Radler',   price: '3,00', type: 'option', cat: 3 },
@@ -154,59 +166,77 @@
         { id: 'soft',        label: 'Softgetränk',   price: '2,50', type: 'option', cat: 1 }
       ];
 
-      // Buttons dynamisch erstellen
+      // Referenzen auf Zeilen-Container
+      const $rowDeposit = document.getElementById('row-deposit');
+      const $rowCat3    = document.getElementById('row-cat3');
+      const $rowCat2    = document.getElementById('row-cat2');
+      const $rowCat1    = document.getElementById('row-cat1');
+
+      // Buttons erzeugen und in die jeweiligen Zeilen einfügen
       items.forEach(item => {
         const btn = document.createElement('button');
         btn.id = item.id;
-        btn.classList.add('btn');
+        btn.setAttribute('data-price', item.price);
+        btn.textContent = item.label;
         if (item.type === 'option') {
           btn.classList.add(`category-${item.cat}`);
+          // Einfügen in die Zeile der jeweiligen Kategorie
+          if (item.cat === 3) $rowCat3.appendChild(btn);
+          if (item.cat === 2) $rowCat2.appendChild(btn);
+          if (item.cat === 1) $rowCat1.appendChild(btn);
+        } else {
+          // Pfand-Button
+          $rowDeposit.appendChild(btn);
         }
-        btn.setAttribute('data-price', item.price);
-        if (item.noDeposit) btn.setAttribute('no-deposit', '');
-        btn.textContent = item.label;
-        $calc.appendChild(btn);
+        if (item.noDeposit) {
+          btn.setAttribute('no-deposit', '');
+        }
       });
 
-      const $buttons = Array.from($calc.querySelectorAll('.btn'));
       const $depositBtn = document.getElementById('deposit_back');
-      const $options = $buttons.filter(b => b !== $depositBtn);
+      const $options    = [
+        ...$rowCat3.querySelectorAll('button'),
+        ...$rowCat2.querySelectorAll('button'),
+        ...$rowCat1.querySelectorAll('button')
+      ];
 
-      // Reset-Funktion
+      // AC-Button zurücksetzen
       $clear.addEventListener('click', () => {
-        [$depositBtn, ...$options].forEach(btn => btn.removeAttribute('data-count'));
-        deposit = 0;
+        // Bei allen Buttons data-count entfernen
+        [$depositBtn, ...$options].forEach(b => b.removeAttribute('data-count'));
+        depositCount = 0;
         calculate();
       });
 
-      // Klick-Handling (nur Zähler hoch, kein “long touch”)
+      // Klick zum Zähler hochsetzen (kein Long-Touch mehr)
       function updateCount(elem) {
         const current = parseInt(elem.getAttribute('data-count')) || 0;
-        const next = (current + 1 < 50) ? current + 1 : 0;
+        const next    = (current + 1 < 50) ? current + 1 : 0;
         elem.setAttribute('data-count', next);
         return current !== next;
       }
 
-      // Aktion für jede Option
+      // Option-Buttons
       $options.forEach(btn => {
         btn.addEventListener('click', () => {
           if (updateCount(btn)) {
+            // Deposit nur erhöhen, wenn kein "no-deposit"
             if (!btn.hasAttribute('no-deposit')) {
-              deposit++;
+              depositCount++;
             }
             calculate();
           }
         });
       });
 
-      // Aktion Pfand
+      // Pfand-Button
       $depositBtn.addEventListener('click', () => {
         if (updateCount($depositBtn)) {
           calculate();
         }
       });
 
-      // Hilfs-Funktion: Komma oder Punkt parsen
+      // Hilfsfunktion: Komma oder Punkt parsen
       function parseAnyFloat(val) {
         const s = val.replace(',', '.');
         return !isNaN(s) ? parseFloat(s) : 0;
@@ -216,18 +246,18 @@
       function calculate() {
         let total = 0;
 
-        // Summe aller Optionen
+        // Summe aller Options-Buttons
         $options.forEach(btn => {
-          const cnt = parseInt(btn.getAttribute('data-count')) || 0;
+          const cnt   = parseInt(btn.getAttribute('data-count')) || 0;
           const price = parseAnyFloat(btn.getAttribute('data-price'));
           total += cnt * price;
         });
 
-        // Pfand verrechnen
-        const depositBackCount = parseInt($depositBtn.getAttribute('data-count')) || 0;
-        const depositPrice = parseAnyFloat($depositBtn.getAttribute('data-price'));
-        total += deposit * depositPrice;
-        total -= depositBackCount * depositPrice;
+        // Pfand verrechnen: hinzugezählt und abgezählt
+        const depositBackCnt = parseInt($depositBtn.getAttribute('data-count')) || 0;
+        const depositPrice   = parseAnyFloat($depositBtn.getAttribute('data-price'));
+        total += depositCount * depositPrice;
+        total -= depositBackCnt * depositPrice;
 
         $total.textContent = total.toLocaleString(locale, {
           style: 'currency',
@@ -241,3 +271,4 @@
   </script>
 </body>
 </html>
+
