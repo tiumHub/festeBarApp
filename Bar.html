@@ -90,7 +90,7 @@
       user-select: none;
       border: 0.15em solid var(--cat-color);
       color: var(--cat-color);
-      min-height: 3em;
+      min-height: 5em;
     }
 
 
@@ -113,6 +113,7 @@
       content: '\00a0' attr(data-price);
     }
 
+    .category-0 { --cat-color: var(--fg-color); }
     .category-1 { --cat-color: var(--cat1-color); }
     .category-2 { --cat-color: var(--cat2-color); }
     .category-3 { --cat-color: var(--cat3-color); }
@@ -188,6 +189,7 @@
           if (item.cat === 1) $rowCat1.appendChild(btn);
         } else {
           // Pfand-Button
+          btn.classList.add('category-0');
           $rowDeposit.appendChild(btn);
         }
         if (item.noDeposit) {
