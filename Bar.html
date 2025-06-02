@@ -48,11 +48,10 @@
     }
 
     #calculator {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
+      display: grid;
+      grid-template-rows: 0.5fr repeat(4, 1fr); /* 4 Button-Zeilen + Ergebnis */
+      grid-template-columns: 1fr;
       height: 100%;
-      gap: 0.3em;
     }
 
     .result {
@@ -75,9 +74,8 @@
     }
 
     .row {
-      display: flex;
-      gap: 0.3em;
-      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
     }
 
     .row > button {
@@ -90,7 +88,7 @@
       user-select: none;
       border: 0.15em solid var(--cat-color);
       color: var(--cat-color);
-      min-height: 5em;
+      height: 100%;
     }
 
 
