@@ -48,18 +48,19 @@
     }
 
     #calculator {
-      display: flex;
-      flex-direction: column;
+      display: grid;
       width: 100%;
       height: 100%;
       gap: 0.3em;
+      grid-template-rows: 0.5fr 1fr 1fr 1fr 1fr; /* 1. Zeile: Ergebnis, dann 4 Zeilen für Buttons */
     }
 
     .result {
-      display: flex;
-      justify-content: flex-end;
+      display: grid;
+      grid-template-columns: 1fr auto;
       align-items: center;
       gap: 0.5em;
+      width: 100%;
     }
 
     #total {
@@ -75,13 +76,15 @@
     }
 
     .row {
-      display: flex;
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
       gap: 0.3em;
       width: 100%;
+      height: 100%;
     }
 
     .row > button {
-      flex: 1 1 0;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -90,7 +93,8 @@
       user-select: none;
       border: 0.15em solid var(--cat-color);
       color: var(--cat-color);
-      min-height: 5em;
+      height: 100%;
+      min-height: 0;
     }
 
 
