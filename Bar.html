@@ -14,7 +14,7 @@
       --cat1-color: rgb(119, 170, 176);
       --cat2-color: rgb(176, 170, 119);
       --cat3-color: rgb(170, 119, 176);
-      --cat4-color: rgb(119, 176, 119); /* neue Farbe für Kategorie 4 */
+      --cat4-color: rgb(119, 176, 119);
     }
 
     html, body {
@@ -69,11 +69,14 @@
     }
 
     .clear {
-      padding: 0.8em;
-      border: 0.15em solid var(--fg-color);
-      color: var(--fg-color);
+      padding: 1em 1.5em;
+      border: none;
       border-radius: 25px;
-      user-select: none;
+      background-color: #e57373; /* sanftes Rot */
+      color: white;
+      font-weight: bold;
+      font-size: 1.5em;
+      box-shadow: 0 0.3em 0.6em rgba(0, 0, 0, 0.3);
     }
 
     .row {
