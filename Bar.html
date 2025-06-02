@@ -100,6 +100,11 @@
       color: var(--fg-color);
     }
 
+    .row > button.category-0[data-count]:not([data-count='0']) {
+      /* Beim Pfand (category-0) soll der Text schwarz statt weiß sein */
+      color: #000;
+    }
+
     .row > button::before {
       content: '\2007';
       font-weight: bold;
