@@ -191,7 +191,7 @@
       $options.forEach(btn => {
         btn.addEventListener('click', () => {
           if (updateCount(btn)) {
-            if (btn.hasAttribute('no-deposit')) {
+            if (!btn.hasAttribute('no-deposit')) {
               deposit++;
             }
             calculate();
