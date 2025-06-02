@@ -14,6 +14,7 @@
       --cat1-color: rgb(119, 170, 176);
       --cat2-color: rgb(176, 170, 119);
       --cat3-color: rgb(170, 119, 176);
+      --cat4-color: rgb(119, 176, 119); /* neue Farbe für Kategorie 4 */
     }
 
     html, body {
@@ -52,7 +53,7 @@
       width: 100%;
       height: 100%;
       gap: 0.3em;
-      grid-template-rows: repeat(7, 1fr);
+      grid-template-rows: repeat(8, 1fr); /* jetzt 8 Reihen statt 7 */
     }
 
     .result {
@@ -97,7 +98,6 @@
       min-height: 0;
     }
 
-
     .row > button[data-count]:not([data-count='0']) {
       background-color: var(--cat-color);
       border-color: var(--cat-color);
@@ -126,6 +126,7 @@
     .category-1 { --cat-color: var(--cat1-color); }
     .category-2 { --cat-color: var(--cat2-color); }
     .category-3 { --cat-color: var(--cat3-color); }
+    .category-4 { --cat-color: var(--cat4-color); } /* Kategorie 4 */
   </style>
 </head>
 <body>
@@ -137,6 +138,9 @@
 
     <!-- Pfand-Reihe -->
     <div class="row" id="row-deposit"></div>
+
+    <!-- Neue Kategorie 4 -->
+    <div class="row" id="row-cat4"></div>
 
     <!-- Kategorie 3 -->
     <div class="row" id="row-cat3"></div>
@@ -166,9 +170,11 @@
       const $clear      = document.getElementById('clear');
       let depositCount  = 0;
 
-      // Button-Konfiguration
+      // Button-Konfiguration (jetzt mit Tomatensaft und Karottensaft in cat:4)
       const items = [
         { id: 'deposit_back', label: 'Pfand zurück', price: '1,00', type: 'pfand' },
+        { id: 'tomatensaft',  label: 'Tomatensaft',  price: '2,00', type: 'option', cat: 4, noDeposit: true },
+        { id: 'karottensaft', label: 'Karottensaft', price: '2,00', type: 'option', cat: 4, noDeposit: true },
         { id: 'beer',        label: 'Bier/Radler',   price: '3,00', type: 'option', cat: 3 },
         { id: 'wine',        label: 'Weinschorle',   price: '3,00', type: 'option', cat: 3 },
         { id: 'longdrink',   label: 'Longdrink',     price: '5,00', type: 'option', cat: 2 },
@@ -180,6 +186,7 @@
 
       // Referenzen auf Zeilen-Container
       const $rowDeposit = document.getElementById('row-deposit');
+      const $rowCat4    = document.getElementById('row-cat4');  // neue Zeile
       const $rowCat3    = document.getElementById('row-cat3');
       const $rowCat2    = document.getElementById('row-cat2');
       const $rowCat1    = document.getElementById('row-cat1');
@@ -192,7 +199,8 @@
         btn.textContent = item.label;
         if (item.type === 'option') {
           btn.classList.add(`category-${item.cat}`);
-          // Einfügen in die Zeile der jeweiligen Kategorie
+          // Einfügen in die richtige Kategorie-Reihe
+          if (item.cat === 4) $rowCat4.appendChild(btn);
           if (item.cat === 3) $rowCat3.appendChild(btn);
           if (item.cat === 2) $rowCat2.appendChild(btn);
           if (item.cat === 1) $rowCat1.appendChild(btn);
@@ -208,6 +216,7 @@
 
       const $depositBtn = document.getElementById('deposit_back');
       const $options    = [
+        ...$rowCat4.querySelectorAll('button'),
         ...$rowCat3.querySelectorAll('button'),
         ...$rowCat2.querySelectorAll('button'),
         ...$rowCat1.querySelectorAll('button')
@@ -284,4 +293,3 @@
   </script>
 </body>
 </html>
-
