@@ -15,8 +15,8 @@
       --error-color: #FF6B6B;
       --btn-bg: #1F2A33;
       --btn-hover: #2A3B47;
-      --btn-radius: 12px;
-      --spacing: 0.6em;
+      --section-radius: 12px;
+      --spacing: 0.8rem;
     }
 
     * {
@@ -28,7 +28,6 @@
     html, body {
       height: 100%;
       width: 100%;
-      overflow: hidden;
       background-color: var(--bg-color);
       color: var(--fg-color);
       font-family: 'Roboto', '-apple-system', 'BlinkMacSystemFont', sans-serif;
@@ -38,105 +37,120 @@
       font-size: 4svmin;
     }
 
-    #calculator {
-      display: grid;
-      grid-template-rows: auto 1fr;
-      gap: var(--spacing);
-      height: 100%;
-      padding: var(--spacing);
-    }
-
-    /* Ergebnisfeld */
-    .result {
+    body {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      background-color: var(--btn-bg);
-      border-radius: var(--btn-radius);
       padding: var(--spacing);
-      font-size: 1.5em;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
+    #calculator {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    /* 1. Eingabebereich */
+    .input-section {
+      background-color: var(--btn-bg);
+      border-radius: var(--section-radius);
+      padding: var(--spacing);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
     #cash {
-      flex: 1;
-      outline: none;
-      border: none;
+      width: 100%;
+      font-size: 1.2em;
       background: transparent;
+      border: none;
+      outline: none;
       color: var(--fg-color);
       text-align: left;
-      min-height: 1.2em;
+      min-height: 1.4em;
+      /* Platzhalter anzeigen, wenn leer */
+    }
+    #cash:empty::before {
+      content: "Eingegebenes Geld";
+      opacity: 0.4;
     }
 
+    /* 2. Gesamtbetrag-Anzeige */
+    .total-section {
+      background-color: var(--btn-bg);
+      border-radius: var(--section-radius);
+      padding: var(--spacing);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
     #total {
-      margin-left: var(--spacing);
-      font-weight: bold;
       min-width: 5ch;
-      text-align: right;
+      text-align: center;
     }
 
+    /* 3. AC-Button alleine auf eigener Zeile */
+    .clear-section {
+      display: flex;
+      justify-content: center;
+    }
     .clear {
-      background: transparent;
-      border: none;
+      background-color: var(--btn-bg);
       color: var(--error-color);
-      font-weight: bold;
-      font-size: 1.2em;
+      border: 2px solid var(--error-color);
+      border-radius: var(--section-radius);
+      padding: var(--spacing) 1.5rem;
+      font-size: 1.1em;
       cursor: pointer;
-      transition: color 0.2s ease;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
-
     .clear:hover {
-      color: #FF4B4B;
+      background-color: var(--error-color);
+      color: var(--bg-color);
+      transform: translateY(-1px);
+    }
+    .clear:active {
+      transform: translateY(0);
     }
 
-    /* Button-Bereich */
+    /* 4. Optionen-Bereich (Pfand, Longdrink) */
     .buttons {
       display: flex;
       gap: var(--spacing);
       justify-content: center;
-      align-items: center;
       flex-wrap: wrap;
     }
-
     .buttons button {
       flex: 1 1 45%;
-      padding: 1em;
+      padding: var(--spacing);
       font-size: 1.1em;
-      border: none;
-      border-radius: var(--btn-radius);
+      border: 2px solid var(--accent-color);
+      border-radius: var(--section-radius);
       background-color: var(--btn-bg);
       color: var(--fg-color);
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s ease;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
-
     .buttons button:hover {
-      background-color: var(--btn-hover);
-      transform: translateY(-2px);
+      background-color: var(--accent-color);
+      color: var(--bg-color);
+      transform: translateY(-1px);
     }
-
     .buttons button:active {
       transform: translateY(0);
     }
 
-    /* Spezifische Farben */
+    /* Spezifische Knopf-Farben */
     #deposit_back {
-      --btn-accent: var(--accent-color);
-    }
-    #deposit_back {
-      border: 2px solid var(--accent-color);
-    }
-    #deposit_back:hover {
-      background-color: var(--accent-color);
-      color: var(--bg-color);
-    }
-
-    #longdrink {
-      --btn-accent: #A0AEC0;
+      border-color: var(--accent-color);
     }
     #longdrink {
-      border: 2px solid #A0AEC0;
+      border-color: #A0AEC0;
     }
     #longdrink:hover {
       background-color: #A0AEC0;
@@ -144,17 +158,14 @@
     }
 
     @media (max-width: 480px) {
-      .result {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5em;
-      }
-      #total {
-        margin-left: 0;
-        align-self: flex-end;
-      }
       .buttons button {
         flex: 1 1 100%;
+      }
+      #cash, #total {
+        font-size: 1em;
+      }
+      .clear {
+        font-size: 1em;
       }
     }
   </style>
@@ -162,8 +173,7 @@
     'use strict';
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('serviceworker.js')
-          .catch(() => { /* Service Worker nicht verfügbar */ });
+        navigator.serviceWorker.register('serviceworker.js').catch(() => {});
       });
     }
 
@@ -187,9 +197,7 @@
           $e.addEventListener('pointerup', () => {
             $e.classList.remove('is-active');
             window.clearInterval(timer);
-            if (!longTouch) {
-              onTap?.();
-            }
+            if (!longTouch) onTap?.();
           }, { once: true });
           $e.classList.add('is-active');
           event.preventDefault();
@@ -237,12 +245,8 @@
 
       $cash.addEventListener('input', () => calc());
 
-      addTapListener($deposit_back, () => updateCount($deposit_back, 1) && calc(), () => updateCount($deposit_back, -1) && calc());
-      addTapListener($longdrink, () => {
-        if (updateCount($longdrink, 1)) calc();
-      }, () => {
-        if (updateCount($longdrink, -1)) calc();
-      });
+      addTapListener($deposit_back, () => { if (updateCount($deposit_back, 1)) calc(); }, () => { if (updateCount($deposit_back, -1)) calc(); });
+      addTapListener($longdrink, () => { if (updateCount($longdrink, 1)) calc(); }, () => { if (updateCount($longdrink, -1)) calc(); });
 
       calc();
     });
@@ -250,18 +254,25 @@
 </head>
 <body>
   <div id="calculator">
-    <div class="result">
+    <!-- 1. Eingabebereich -->
+    <div class="input-section">
       <div id="cash" inputmode="decimal" contenteditable="true"></div>
+    </div>
+
+    <!-- 2. Gesamtbetrag-Anzeige -->
+    <div class="total-section">
       <div id="total"></div>
+    </div>
+
+    <!-- 3. AC-Button alleinstehend -->
+    <div class="clear-section">
       <button class="clear" id="clear">AC</button>
     </div>
+
+    <!-- 4. Optionen-Bereich -->
     <div class="buttons">
-      <button class="pfand" id="deposit_back" data-price="1,00">
-        Pfand zurück
-      </button>
-      <button class="option" id="longdrink" data-price="5,00">
-        Longdrink
-      </button>
+      <button id="deposit_back" data-price="1,00">Pfand zurück</button>
+      <button id="longdrink" data-price="5,00">Longdrink</button>
     </div>
   </div>
 </body>
