@@ -2,278 +2,275 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="robots" content="noindex, nofollow">
   <title>DY Calc</title>
   <style>
     :root {
-      --bg-color: #0A1218;
-      --fg-color: #E3FEF7;
-      --accent-color: #4FD1C5;
-      --error-color: #FF6B6B;
-      --btn-bg: #1F2A33;
-      --btn-hover: #2A3B47;
-      --section-radius: 12px;
-      --spacing: 0.8rem;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+      --bg-color: rgb(0, 20, 27);
+      --fg-color: rgb(227, 254, 247);
+      --cat1-color: rgb(119, 170, 176);
+      --cat2-color: rgb(176, 170, 119);
+      --cat3-color: rgb(170, 119, 176);
+      --cat4-color: rgb(119, 176, 119);
+      --cat5-color: rgb(176, 119, 119);
     }
 
     html, body {
-      height: 100%;
-      width: 100%;
-      background-color: var(--bg-color);
-      color: var(--fg-color);
-      font-family: 'Roboto', '-apple-system', 'BlinkMacSystemFont', sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      font-size: 4vmin;
-      font-size: 4svmin;
+      margin: 0;
+      padding: 0;
+      touch-action: none;
+      caret-color: currentcolor;
     }
 
     body {
+      box-sizing: border-box;
+      height: 100vh;
+      width: 100vw;
+      padding: 1em 0.6em;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: var(--spacing);
+      font-family: 'Roboto', '-apple-system', 'BlinkMacSystemFont', sans-serif;
+      font-feature-settings: 'tnum';
+      font-size: 4vmin;
+      background-color: var(--bg-color);
+      color: var(--fg-color);
+    }
+
+    button {
+      font-size: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
     }
 
     #calculator {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing);
+      display: grid;
       width: 100%;
-      max-width: 400px;
+      height: 100%;
+      gap: 0.3em;
+      grid-template-rows: repeat(4, 1fr); /* 4 Zeilen für 3 Kategorien */
     }
 
-    /* 1. Eingabebereich */
-    .input-section {
-      background-color: var(--btn-bg);
-      border-radius: var(--section-radius);
-      padding: var(--spacing);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-    #cash {
+    .result {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 0.5em;
       width: 100%;
-      font-size: 1.2em;
-      background: transparent;
+    }
+
+    #total {
+      font-size: 2em;
+    }
+
+    .clear {
+      width: auto;
+      height: 90%;
+      padding: 0 1.2em;
       border: none;
-      outline: none;
-      color: var(--fg-color);
-      text-align: left;
-      min-height: 1.4em;
-      /* Platzhalter anzeigen, wenn leer */
-    }
-    #cash:empty::before {
-      content: "Eingegebenes Geld";
-      opacity: 0.4;
+      border-radius: 25px;
+      background-color: #e57373;
+      color: white;
+      font-weight: bold;
+      font-size: 1.8em;
+      align-self: stretch;
+      justify-self: end;
     }
 
-    /* 2. Gesamtbetrag-Anzeige */
-    .total-section {
-      background-color: var(--btn-bg);
-      border-radius: var(--section-radius);
-      padding: var(--spacing);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    .row {
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+      gap: 0.3em;
+      width: 100%;
+      height: 100%;
+    }
+
+    .row > button {
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 1.5em;
+      border-radius: 25px;
+      box-sizing: border-box;
+      user-select: none;
+      border: 0.15em solid var(--cat-color);
+      color: var(--cat-color);
+      height: 100%;
+      min-height: 0;
+      font-size: 1.2em;
+    }
+
+    .row > button[data-count]:not([data-count='0']) {
+      background-color: var(--cat-color);
+      border-color: var(--cat-color);
+      color: var(--fg-color);
+    }
+
+    .row > button.category-0[data-count]:not([data-count='0']) {
+      /* Beim Pfand (category-0) soll der Text schwarz statt weiß sein */
+      color: #000;
+    }
+
+    .row > button::before {
+      content: '\2007';
       font-weight: bold;
     }
-    #total {
-      min-width: 5ch;
-      text-align: center;
+
+    .row > button[data-count]:not([data-count='0'])::before {
+      content: attr(data-count) '\00a0';
     }
 
-    /* 3. AC-Button alleine auf eigener Zeile */
-    .clear-section {
-      display: flex;
-      justify-content: center;
-    }
-    .clear {
-      background-color: var(--btn-bg);
-      color: var(--error-color);
-      border: 2px solid var(--error-color);
-      border-radius: var(--section-radius);
-      padding: var(--spacing) 1.5rem;
-      font-size: 1.1em;
-      cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.1s ease;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    .clear:hover {
-      background-color: var(--error-color);
-      color: var(--bg-color);
-      transform: translateY(-1px);
-    }
-    .clear:active {
-      transform: translateY(0);
+    .row > button[data-price]::after {
+      content: '\00a0' attr(data-price);
     }
 
-    /* 4. Optionen-Bereich (Pfand, Longdrink) */
-    .buttons {
-      display: flex;
-      gap: var(--spacing);
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .buttons button {
-      flex: 1 1 45%;
-      padding: var(--spacing);
-      font-size: 1.1em;
-      border: 2px solid var(--accent-color);
-      border-radius: var(--section-radius);
-      background-color: var(--btn-bg);
-      color: var(--fg-color);
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-    .buttons button:hover {
-      background-color: var(--accent-color);
-      color: var(--bg-color);
-      transform: translateY(-1px);
-    }
-    .buttons button:active {
-      transform: translateY(0);
-    }
-
-    /* Spezifische Knopf-Farben */
-    #deposit_back {
-      border-color: var(--accent-color);
-    }
-    #longdrink {
-      border-color: #A0AEC0;
-    }
-    #longdrink:hover {
-      background-color: #A0AEC0;
-      color: var(--bg-color);
-    }
-
-    @media (max-width: 480px) {
-      .buttons button {
-        flex: 1 1 100%;
-      }
-      #cash, #total {
-        font-size: 1em;
-      }
-      .clear {
-        font-size: 1em;
-      }
-    }
+    .category-0 { --cat-color: var(--fg-color); }
+    .category-1 { --cat-color: var(--cat1-color); }
+    .category-2 { --cat-color: var(--cat2-color); }
+    .category-3 { --cat-color: var(--cat3-color); }
+    .category-4 { --cat-color: var(--cat4-color); }
+    .category-5 { --cat-color: var(--cat5-color); }
   </style>
+</head>
+<body>
+  <div id="calculator">
+    <div class="result">
+      <div id="total">0,00 €</div>
+      <button class="clear" id="clear">AC</button>
+    </div>
+
+    <!-- Pfand-Reihe -->
+    <div class="row" id="row-deposit"></div>
+
+    <div class="row" id="row-cat1"></div>
+  </div>
+
   <script>
     'use strict';
+
+    // Service Worker (optional)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('serviceworker.js').catch(() => {});
+        navigator.serviceWorker
+          .register('serviceworker.js')
+          .catch(() => { /* OK auch ohne SW */ });
       });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const locale = document.documentElement.getAttribute('lang');
-      const $calc = document.querySelector('#calculator');
-      const $cash = $calc.querySelector('#cash');
-      const $total = $calc.querySelector('#total');
-      const $clear = $calc.querySelector('#clear');
-      const $deposit_back = $calc.querySelector('#deposit_back');
-      const $longdrink = $calc.querySelector('#longdrink');
-      let deposit = 0;
+      const locale = document.documentElement.lang;
+      const $total      = document.getElementById('total');
+      const $clear      = document.getElementById('clear');
+      let depositCount  = 0;
 
-      function addTapListener($e, onTap, onHold) {
-        $e.addEventListener('pointerdown', (event) => {
-          let longTouch = false;
-          const timer = window.setInterval(() => {
-            longTouch = true;
-            onHold?.();
-          }, 500);
-          $e.addEventListener('pointerup', () => {
-            $e.classList.remove('is-active');
-            window.clearInterval(timer);
-            if (!longTouch) onTap?.();
-          }, { once: true });
-          $e.classList.add('is-active');
-          event.preventDefault();
+      const items = [
+        { id: 'deposit_back', label: 'Pfand zurück',price: '1,00', type: 'pfand' },
+        { id: 'drink1.1', label: 'Aperol Spritz',   price: '6,00', type: 'option', cat: 1 }
+      ];
+
+      // Referenzen auf Zeilen-Container
+      const $rowDeposit = document.getElementById('row-deposit');
+      const $rowCat1    = document.getElementById('row-cat1');
+
+      // Buttons erzeugen und in die jeweiligen Zeilen einfügen
+      items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.id = item.id;
+        btn.setAttribute('data-price', item.price);
+        btn.textContent = item.label;
+        if (item.type === 'option') {
+          btn.classList.add(`category-${item.cat}`);
+          // Einfügen in die richtige Kategorie-Reihe
+          if (item.cat === 1) $rowCat1.appendChild(btn);
+        } else {
+          // Pfand-Button
+          btn.classList.add('category-0');
+          $rowDeposit.appendChild(btn);
+        }
+        if (item.noDeposit) {
+          btn.setAttribute('no-deposit', '');
+        }
+      });
+
+      const $depositBtn = document.getElementById('deposit_back');
+      const $options    = [
+        ...$rowCat1.querySelectorAll('button')
+      ];
+
+      // AC-Button zurücksetzen
+      $clear.addEventListener('click', () => {
+        // Bei allen Buttons data-count entfernen
+        [$depositBtn, ...$options].forEach(b => b.removeAttribute('data-count'));
+        depositCount = 0;
+        calculate();
+      });
+
+      // Klick zum Zähler hochsetzen (kein Long-Touch mehr)
+      function updateCount(elem) {
+        const current = parseInt(elem.getAttribute('data-count')) || 0;
+        const next    = (current + 1 < 50) ? current + 1 : 0;
+        elem.setAttribute('data-count', next);
+        return current !== next;
+      }
+
+      // Option-Buttons
+      $options.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (updateCount(btn)) {
+            // Deposit nur erhöhen, wenn kein "no-deposit"
+            if (!btn.hasAttribute('no-deposit')) {
+              depositCount++;
+            }
+            calculate();
+          }
+        });
+      });
+
+      // Pfand-Button
+      $depositBtn.addEventListener('click', () => {
+        if (updateCount($depositBtn)) {
+          calculate();
+        }
+      });
+
+      // Hilfsfunktion: Komma oder Punkt parsen
+      function parseAnyFloat(val) {
+        const s = val.replace(',', '.');
+        return !isNaN(s) ? parseFloat(s) : 0;
+      }
+
+      // Zentrale Berechnung
+      function calculate() {
+        let total = 0;
+
+        // Summe aller Options-Buttons
+        $options.forEach(btn => {
+          const cnt   = parseInt(btn.getAttribute('data-count')) || 0;
+          const price = parseAnyFloat(btn.getAttribute('data-price'));
+          total += cnt * price;
+        });
+
+        // Pfand verrechnen: hinzugezählt und abgezählt
+        const depositBackCnt = parseInt($depositBtn.getAttribute('data-count')) || 0;
+        const depositPrice   = parseAnyFloat($depositBtn.getAttribute('data-price'));
+        total += depositCount * depositPrice;
+        total -= depositBackCnt * depositPrice;
+
+        $total.textContent = total.toLocaleString(locale, {
+          style: 'currency',
+          currency: 'EUR'
         });
       }
 
-      function updateCount($e, amount) {
-        const count = Number.parseInt($e.getAttribute('data-count')) || 0;
-        const updated = count + amount > 0 && count + amount < 50 ? count + amount : 0;
-        $e.setAttribute('data-count', updated);
-        return count !== updated;
-      }
-
-      function calc() {
-        const cashValue = parseFloat($cash.textContent.replace(',', '.')) || 0;
-        const deposit_back = Number.parseInt($deposit_back.getAttribute('data-count')) || 0;
-        let total = 0;
-
-        const ldCount = Number.parseInt($longdrink.getAttribute('data-count')) || 0;
-        const ldPrice = parseFloat($longdrink.getAttribute('data-price').replace(',', '.')) || 0;
-        total += ldCount * ldPrice;
-
-        total += deposit * parseFloat($deposit_back.getAttribute('data-price').replace(',', '.'));
-        total -= deposit_back * parseFloat($deposit_back.getAttribute('data-price').replace(',', '.'));
-
-        $calc.classList.remove('is-change', 'is-change-missing');
-        if (cashValue > 0) {
-          total = total - cashValue;
-          if (total <= 0) {
-            $calc.classList.add('is-change');
-          } else {
-            $calc.classList.add('is-change-missing');
-          }
-        }
-        $total.textContent = total.toLocaleString(locale, { style: 'currency', currency: 'EUR' });
-      }
-
-      $clear.addEventListener('click', () => {
-        $cash.textContent = '';
-        $deposit_back.removeAttribute('data-count');
-        $longdrink.removeAttribute('data-count');
-        deposit = 0;
-        calc();
-      });
-
-      $cash.addEventListener('input', () => calc());
-
-      addTapListener($deposit_back, () => { if (updateCount($deposit_back, 1)) calc(); }, () => { if (updateCount($deposit_back, -1)) calc(); });
-      addTapListener($longdrink, () => { if (updateCount($longdrink, 1)) calc(); }, () => { if (updateCount($longdrink, -1)) calc(); });
-
-      calc();
+      // Initialer Aufruf
+      calculate();
     });
   </script>
-</head>
-<body>
-  <div id="calculator">
-    <!-- 1. Eingabebereich -->
-    <div class="input-section">
-      <div id="cash" inputmode="decimal" contenteditable="true"></div>
-    </div>
-
-    <!-- 2. Gesamtbetrag-Anzeige -->
-    <div class="total-section">
-      <div id="total"></div>
-    </div>
-
-    <!-- 3. AC-Button alleinstehend -->
-    <div class="clear-section">
-      <button class="clear" id="clear">AC</button>
-    </div>
-
-    <!-- 4. Optionen-Bereich -->
-    <div class="buttons">
-      <button id="deposit_back" data-price="1,00">Pfand zurück</button>
-      <button id="longdrink" data-price="5,00">Longdrink</button>
-    </div>
-  </div>
 </body>
 </html>
