@@ -51,7 +51,7 @@
       width: 100%;
       height: 100%;
       gap: 0.3em;
-      grid-template-rows: repeat(6, 1fr); /* 3 Zeilen: Pfand + 2 Shots */
+      grid-template-rows: repeat(6, 1fr); /* 3 Zeilen: (Pfand entfernt, aber weiter 3 Zeilen) */
     }
 
     .result {
@@ -109,11 +109,6 @@
       color: var(--fg-color);
     }
 
-    .row > button.category-0[data-count]:not([data-count='0']) {
-      /* Beim Pfand (category-0) soll der Text schwarz statt weiß sein */
-      color: #000;
-    }
-
     .row > button::before {
       content: '\2007';
       font-weight: bold;
@@ -127,7 +122,6 @@
       content: '\00a0' attr(data-price);
     }
 
-    .category-0 { --cat-color: var(--fg-color); }
     .category-1 { --cat-color: var(--cat1-color); }
     .category-2 { --cat-color: var(--cat2-color); }
   </style>
@@ -139,8 +133,8 @@
       <button class="clear" id="clear">AC</button>
     </div>
 
-    <!-- Pfand-Reihe -->
-    <div class="row" id="row-deposit"></div>
+    <!-- Leere Zeile als Ersatz für Pfand -->
+    <div class="row" id="row-empty"></div>
     <!-- Billiger Shot -->
     <div class="row" id="row-cat1"></div>
     <!-- Shot -->
@@ -163,16 +157,15 @@
       const locale = document.documentElement.lang;
       const $total      = document.getElementById('total');
       const $clear      = document.getElementById('clear');
-      let depositCount  = 0;
 
+      // Nur noch zwei Kategorien, Pfand entfernt
       const items = [
-        { id: 'deposit_back', label: 'Pfand zurück', price: '1,00', type: 'pfand' },
-        { id: 'cheap_shot', label: 'billiger Shot', price: '1,50', type: 'option', cat: 1, noDeposit: true },
-        { id: 'shot', label: 'Shot', price: '2,00', type: 'option', cat: 2, noDeposit: true }
+        { id: 'cheap_shot', label: 'billiger Shot', price: '1,50', type: 'option', cat: 1 },
+        { id: 'shot', label: 'Shot', price: '2,00', type: 'option', cat: 2 }
       ];
 
       // Referenzen auf Zeilen-Container
-      const $rowDeposit = document.getElementById('row-deposit');
+      // row-empty bleibt leer für Grid-Gleichheit
       const $rowCat1    = document.getElementById('row-cat1');
       const $rowCat2    = document.getElementById('row-cat2');
 
@@ -182,22 +175,12 @@
         btn.id = item.id;
         btn.setAttribute('data-price', item.price);
         btn.textContent = item.label;
-        if (item.type === 'option') {
-          btn.classList.add(`category-${item.cat}`);
-          // In die richtige Kategorie-Reihe einfügen
-          if (item.cat === 1) $rowCat1.appendChild(btn);
-          if (item.cat === 2) $rowCat2.appendChild(btn);
-        } else {
-          // Pfand-Button
-          btn.classList.add('category-0');
-          $rowDeposit.appendChild(btn);
-        }
-        if (item.noDeposit) {
-          btn.setAttribute('no-deposit', '');
-        }
+        btn.classList.add(`category-${item.cat}`);
+        // In die richtige Kategorie-Reihe einfügen
+        if (item.cat === 1) $rowCat1.appendChild(btn);
+        if (item.cat === 2) $rowCat2.appendChild(btn);
       });
 
-      const $depositBtn = document.getElementById('deposit_back');
       const $options    = [
         ...$rowCat1.querySelectorAll('button'),
         ...$rowCat2.querySelectorAll('button')
@@ -205,9 +188,7 @@
 
       // AC-Button zurücksetzen
       $clear.addEventListener('click', () => {
-        // Bei allen Buttons data-count entfernen
-        [$depositBtn, ...$options].forEach(b => b.removeAttribute('data-count'));
-        depositCount = 0;
+        $options.forEach(b => b.removeAttribute('data-count'));
         calculate();
       });
 
@@ -223,20 +204,9 @@
       $options.forEach(btn => {
         btn.addEventListener('click', () => {
           if (updateCount(btn)) {
-            // Deposit nur erhöhen, wenn kein "no-deposit"
-            if (!btn.hasAttribute('no-deposit')) {
-              depositCount++;
-            }
             calculate();
           }
         });
-      });
-
-      // Pfand-Button
-      $depositBtn.addEventListener('click', () => {
-        if (updateCount($depositBtn)) {
-          calculate();
-        }
       });
 
       // Hilfsfunktion: Komma oder Punkt parsen
@@ -255,12 +225,6 @@
           const price = parseAnyFloat(btn.getAttribute('data-price'));
           total += cnt * price;
         });
-
-        // Pfand verrechnen: hinzugezählt und abgezählt
-        const depositBackCnt = parseInt($depositBtn.getAttribute('data-count')) || 0;
-        const depositPrice   = parseAnyFloat($depositBtn.getAttribute('data-price'));
-        total += depositCount * depositPrice;
-        total -= depositBackCnt * depositPrice;
 
         $total.textContent = total.toLocaleString(locale, {
           style: 'currency',
