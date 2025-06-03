@@ -11,11 +11,8 @@
     :root {
       --bg-color: rgb(0, 20, 27);
       --fg-color: rgb(227, 254, 247);
-      --cat1-color: rgb(119, 170, 176);
-      --cat2-color: rgb(176, 170, 119);
-      --cat3-color: rgb(170, 119, 176);
-      --cat4-color: rgb(119, 176, 119);
-      --cat5-color: rgb(176, 119, 119);
+      --cat1-color: #e5a857; /* NEU: Orange für "billiger Shot" */
+      --cat2-color: #7D5FFF; /* NEU: Violett-Blau für "Shot" */
     }
 
     html, body {
@@ -54,7 +51,7 @@
       width: 100%;
       height: 100%;
       gap: 0.3em;
-      grid-template-rows: repeat(8, 1fr); /* 8 Zeilen für 7 Kategorien */
+      grid-template-rows: repeat(5, 1fr); /* 3 Zeilen: Pfand + 2 Shots */
     }
 
     .result {
@@ -133,9 +130,6 @@
     .category-0 { --cat-color: var(--fg-color); }
     .category-1 { --cat-color: var(--cat1-color); }
     .category-2 { --cat-color: var(--cat2-color); }
-    .category-3 { --cat-color: var(--cat3-color); }
-    .category-4 { --cat-color: var(--cat4-color); }
-    .category-5 { --cat-color: var(--cat5-color); }
   </style>
 </head>
 <body>
@@ -147,13 +141,10 @@
 
     <!-- Pfand-Reihe -->
     <div class="row" id="row-deposit"></div>
-
-    <!-- Neue Kategorie 4 -->
-    <div class="row" id="row-cat5"></div>
-    <div class="row" id="row-cat4"></div>
-    <div class="row" id="row-cat3"></div>
-    <div class="row" id="row-cat2"></div>
+    <!-- Billiger Shot -->
     <div class="row" id="row-cat1"></div>
+    <!-- Shot -->
+    <div class="row" id="row-cat2"></div>
   </div>
 
   <script>
@@ -175,24 +166,15 @@
       let depositCount  = 0;
 
       const items = [
-        { id: 'deposit_back', label: 'Pfand zurück',price: '1,00', type: 'pfand' },
-        { id: 'drink5.1', label: 'Bier/ Radler/ Weinschorle',            price: '3,00', type: 'option', cat: 5 },
-        { id: 'drink4.1', label: 'Vodka Mate',      price: '7,00', type: 'option', cat: 4 },
-        { id: 'drink4.2', label: 'Vodka Bull',      price: '5,00', type: 'option', cat: 4 },
-        { id: 'drink3.1', label: 'Long Drink',      price: '5,00', type: 'option', cat: 3 },
-        { id: 'drink2.1', label: 'billig Shot',     price: '1,50', type: 'option', cat: 2, noDeposit: true },
-        { id: 'drink2.2', label: 'Shot',            price: '2,00', type: 'option', cat: 2, noDeposit: true },
-        { id: 'drink1.1', label: 'Sprudelwasser',   price: '2,00', type: 'option', cat: 1 },
-        { id: 'drink1.2', label: 'Softdrink',       price: '2,50', type: 'option', cat: 1 }
+        { id: 'deposit_back', label: 'Pfand zurück', price: '1,00', type: 'pfand' },
+        { id: 'cheap_shot', label: 'billiger Shot', price: '1,50', type: 'option', cat: 1, noDeposit: true },
+        { id: 'shot', label: 'Shot', price: '2,00', type: 'option', cat: 2, noDeposit: true }
       ];
 
       // Referenzen auf Zeilen-Container
       const $rowDeposit = document.getElementById('row-deposit');
-      const $rowCat5    = document.getElementById('row-cat5');
-      const $rowCat4    = document.getElementById('row-cat4');
-      const $rowCat3    = document.getElementById('row-cat3');
-      const $rowCat2    = document.getElementById('row-cat2');
       const $rowCat1    = document.getElementById('row-cat1');
+      const $rowCat2    = document.getElementById('row-cat2');
 
       // Buttons erzeugen und in die jeweiligen Zeilen einfügen
       items.forEach(item => {
@@ -202,12 +184,9 @@
         btn.textContent = item.label;
         if (item.type === 'option') {
           btn.classList.add(`category-${item.cat}`);
-          // Einfügen in die richtige Kategorie-Reihe
-          if (item.cat === 5) $rowCat5.appendChild(btn);
-          if (item.cat === 4) $rowCat4.appendChild(btn);
-          if (item.cat === 3) $rowCat3.appendChild(btn);
-          if (item.cat === 2) $rowCat2.appendChild(btn);
+          // In die richtige Kategorie-Reihe einfügen
           if (item.cat === 1) $rowCat1.appendChild(btn);
+          if (item.cat === 2) $rowCat2.appendChild(btn);
         } else {
           // Pfand-Button
           btn.classList.add('category-0');
@@ -220,11 +199,8 @@
 
       const $depositBtn = document.getElementById('deposit_back');
       const $options    = [
-        ...$rowCat5.querySelectorAll('button'),
-        ...$rowCat4.querySelectorAll('button'),
-        ...$rowCat3.querySelectorAll('button'),
-        ...$rowCat2.querySelectorAll('button'),
-        ...$rowCat1.querySelectorAll('button')
+        ...$rowCat1.querySelectorAll('button'),
+        ...$rowCat2.querySelectorAll('button')
       ];
 
       // AC-Button zurücksetzen
